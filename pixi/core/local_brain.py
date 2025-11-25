@@ -110,6 +110,11 @@ class LocalBrain:
              # otherwise map to WIGGLE_EXCITEDLY for now.
             return self._pack_decision(ActionName.WIGGLE_EXCITEDLY, "Being petted", face_data, gesture)
 
+        # --- PRIORITY 3.5: PERSONAL SPACE ---
+        # If face is too big (too close), back away.
+        if face_data and face_data.get("area", 0.0) > 0.28:
+            return self._pack_decision(ActionName.BACK_AWAY_SCARED, "Personal Space Violation", face_data, gesture)
+
         # --- PRIORITY 4: UTILITY SCORING ---
         
         # A. Social / Follow
@@ -135,7 +140,7 @@ class LocalBrain:
 
         # C. Play / Dance
         # Needs high energy and excitement
-        scores[ActionName.DO_A_HAPPY_DANCE] = (current_state['excitement'] * current_state['energy']) * 0.8
+        scores[ActionName.DO_A_HAPPY_DANCE] = (current_state['excitement'] * current_state['energy']) * 0.7
 
         # D. Sleep / Nap (Boredom)
         # If very bored or somewhat tired

@@ -173,7 +173,28 @@ def main(
                 if face:
                     h, w, _ = display_frame.shape
                     cx, cy = int(face["center_x"] * w), int(face["center_y"] * h)
-                    cv2.circle(display_frame, (cx, cy), 10, (0, 255, 0), 2)
+                    
+                    # Draw Bounding Box
+                    # Use normalized width/height if available (added in recent update), else fallback to px
+                    if "width" in face:
+                        box_w = int(face["width"] * w)
+                        box_h = int(face["height"] * h)
+                    else:
+                        # Fallback for older version compatibility
+                        box_w = int(face.get("width_px", 0))
+                        box_h = int(face.get("height_px", 0))
+
+                    if box_w > 0 and box_h > 0:
+                        x1 = int(cx - box_w / 2)
+                        y1 = int(cy - box_h / 2)
+                        cv2.rectangle(display_frame, (x1, y1), (x1 + box_w, y1 + box_h), (0, 255, 0), 2)
+                        
+                        # Show Area Percentage
+                        area_pct = face.get("area", 0.0) * 100
+                        cv2.putText(display_frame, f"Area: {area_pct:.1f}%", (x1, y1 - 10), 
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+                    cv2.circle(display_frame, (cx, cy), 5, (0, 0, 255), -1)
                     cv2.putText(display_frame, "Face", (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
                 # Draw Gesture

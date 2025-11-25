@@ -192,6 +192,8 @@ class VisionProcessor:
                         "type": "face",
                         "center_x": max(0.0, min(1.0, cx)),
                         "center_y": max(0.0, min(1.0, cy)),
+                        "width": width_px / w,
+                        "height": height_px / h,
                         "area": area,
                         "confidence": score,
                         "width_px": width_px,
