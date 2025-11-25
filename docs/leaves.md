@@ -1,74 +1,144 @@
 ```mermaid
 graph TD
-    subgraph FollowLogic [Behavior: FOLLOW_PERSON]
+    subgraph Reflexes
         direction TB
-        FollowRoot[("? Selector\n(Try these in order)")]
         
-        %% Branch 1: Too Close (Safety Bubble)
-        TooCloseSeq[("-> Sequence\n(Too Close?)")]
-        FollowRoot --> TooCloseSeq
-        CheckArea1{{"? Face Area > 30%"}} --> TooCloseSeq
-        ActionBack["Action: STOP & LOOK UP"] --> TooCloseSeq
-        
-        %% Branch 2: Just Right (Steering)
-        SteerSeq[("-> Sequence\n(Steer & Drive)")]
-        FollowRoot --> SteerSeq
-        CheckFace{{"? Face Visible"}} --> SteerSeq
-        CalcPID["Calculate Turn Angle (PID)"] --> SteerSeq
-        ActionTurn["Action: DRIVE (Speed based on Distance)"] --> SteerSeq
-        
-        %% Branch 3: Target Lost (Fallback)
-        LostSeq[("-> Sequence\n(Target Lost)")]
-        FollowRoot --> LostSeq
-        ActionScan["Action: SCAN_LEFT_RIGHT\n(Rapid Search)"] --> LostSeq
+        %% EMERGENCY SHUTDOWN
+        ShutdownRoot[("EMERGENCY_SHUTDOWN\n(Sequence)")]
+        ShutdownRoot --> Stop1[("Action: STOP_ALL_MOTORS")]
+        ShutdownRoot --> Face1[("Action: DISPLAY_LOW_BATT")]
+        ShutdownRoot --> Sound1[("Action: PLAY_POWER_DOWN")]
+        ShutdownRoot --> SleepLoop[("Action: SLEEP_UNTIL_CHARGED")]
+
+        %% AVOID OBSTACLE
+        AvoidRoot[("AVOID_OBSTACLE\n(Sequence)")]
+        AvoidRoot --> Stop2[("Action: STOP_MOTORS")]
+        AvoidRoot --> Back[("Action: MOVE_BACK_5CM")]
+        AvoidRoot --> Turn[("Action: TURN_RANDOM_30_DEG")]
     end
 
 ```
 
 ```mermaid
-
 graph TD
-    subgraph SearchLogic [Behavior: SEARCH_FOR_HUMAN]
+    subgraph Interactions
         direction TB
-        SearchRoot[("-> Sequence")]
         
-        %% Step 1: Look around current spot
-        SpinAction["Action: SPIN_60_SLOW_LEFT_RIGHT\n(Scan Room)"] --> SearchRoot
-        
-        %% Step 2: Drive to new vantage point
-        MoveRandom["Action: DRIVE_TO_RANDOM_POINT"] --> SearchRoot
-        
-        %% Step 3: Wait and Listen
-        WaitAction["Action: PAUSE_2_SEC\n(Check for faces again)"] --> SearchRoot
-        
-        %% Note: If at ANY point a face is found, 
-        %% the Utility AI in Diagram 1 switches to FOLLOW_PERSON immediately.
+        %% ENJOY TOUCH (Wiggle/Purr)
+        TouchRoot[("ENJOY_TOUCH\n(Sequence)")]
+        TouchRoot --> Stop3[("Action: STOP_WHEELS")]
+        TouchRoot --> Face2[("Action: FACE_HAPPY_CLOSED_EYES")]
+        TouchRoot --> Sound2[("Action: PLAY_PURR")]
+        TouchRoot --> Body[("Action: GENTLE_WIGGLE")]
+
+        %% LISTEN (Audio Hotword)
+        ListenRoot[("LISTEN_TO_USER\n(Sequence)")]
+        ListenRoot --> Stop4[("Action: STOP_MOTORS_INSTANT")]
+        ListenRoot --> Face3[("Action: FACE_LISTENING_ANIM")]
+        ListenRoot --> Wait[("Action: WAIT_FOR_SPEECH_END")]
     end
 
 ```
 
 ```mermaid
-sequenceDiagram
-    participant User
-    participant Mic as Microphone
-    participant Vis as Vision System
-    participant Brain as Utility AI
-    participant Motor as Wheels
+graph TD
+    subgraph Social
+        direction TB
+        
+        %% GREET HAPPILY
+        GreetRoot[("GREET_HAPPILY\n(Sequence)")]
+        GreetRoot --> FaceG[("Action: FACE_EXCITED")]
+        GreetRoot --> SoundG[("Action: PLAY_CHIRP")]
+        GreetRoot --> HeadG[("Action: HEAD_NOD_UP")]
+        GreetRoot --> Wave[("Action: WAVE_HAND (If equipped)")]
 
-    Note over User, Motor: Normal Operation
-    User->>Vis: User Walks By
-    Vis->>Brain: "Face Detected"
-    Brain->>Motor: Action: FOLLOW_PERSON (Driving...)
-    
-    Note over User, Motor: User Interrupts
-    User->>Mic: "Hey Pixi!"
-    Mic->>Brain: HOTWORD DETECTED! (Set Listening=True)
-    
-    Note right of Brain: Priority 1 Override Triggered!
-    Brain->>Motor: Action: STOP DRIVING (Silence Motors)
-    Brain->>Motor: Action: LOOK AT FACE (Keep Eye Contact)
-    
-    User->>Mic: "What is the weather?"
-    Mic->>Brain: Recording Audio -> Sending to Cloud...
+        %% COME CLOSER (Aggressive Following)
+        CloserRoot[("COME_CLOSER\n(Selector)")]
+        
+        %% Branch 1: Arrived
+        ArrivedSeq[("-> Sequence (Arrived)")]
+        CloserRoot --> ArrivedSeq
+        CheckDist{{"? Distance < 30cm"}} --> ArrivedSeq
+        StopC[("Action: STOP & LOOK_UP")] --> ArrivedSeq
+        
+        %% Branch 2: Approach
+        ApproachSeq[("-> Sequence (Approach)")]
+        CloserRoot --> ApproachSeq
+        VisCheck{{"? Face Visible"}} --> ApproachSeq
+        DriveFast[("Action: DRIVE_FORWARD_FAST")] --> ApproachSeq
+    end
 ```
 
+```mermaid
+graph TD
+    subgraph Tracking
+        direction TB
+        
+        %% FOLLOW PERSON (Polite Following)
+        FollowRoot[("FOLLOW_PERSON\n(Selector)")]
+        
+        %% Too Close
+        BackSeq[("-> Sequence (Too Close)")]
+        FollowRoot --> BackSeq
+        CheckClose{{"? Face Area > 30%"}} --> BackSeq
+        BackAct[("Action: BACK_UP_SLOWLY")] --> BackSeq
+        
+        %% Steer
+        SteerSeq[("-> Sequence (Steer)")]
+        FollowRoot --> SteerSeq
+        CheckVis{{"? Face Visible"}} --> SteerSeq
+        PID[("Action: PID_STEERING_DRIVE")] --> SteerSeq
+
+        %% SEARCH (Patrol)
+        SearchRoot[("SEARCH_FOR_HUMAN\n(Sequence)")]
+        Spin[("Action: SPIN_360_SLOW")] --> SearchRoot
+        Move[("Action: DRIVE_TO_NEW_SPOT")] --> SearchRoot
+        Scan[("Action: SCAN_HEAD_PAN")] --> SearchRoot
+    end
+```
+
+```mermaid
+graph TD
+    subgraph Play
+        direction TB
+        
+        %% DO A HAPPY DANCE
+        DanceRoot[("DO_A_HAPPY_DANCE\n(Sequence)")]
+        FaceD[("Action: FACE_RAINBOW")] --> DanceRoot
+        SoundD[("Action: PLAY_DANCE_MUSIC")] --> DanceRoot
+        SpinD[("Action: SPIN_CIRCLE_FAST")] --> DanceRoot
+        ShakeD[("Action: SHAKE_LEFT_RIGHT")] --> DanceRoot
+        
+        %% WIGGLE (Stationary)
+        WiggleRoot[("WIGGLE_EXCITEDLY\n(Sequence)")]
+        SoundW[("Action: PLAY_GIGGLE")] --> WiggleRoot
+        Shimmy[("Action: RAPID_TURN_LEFT_RIGHT_SMALL")] --> WiggleRoot
+    end
+```
+
+```mermaid
+graph TD
+    subgraph Idle
+        direction TB
+        
+        %% TILT HEAD (Curiosity)
+        TiltRoot[("TILT_HEAD_CURIOUSLY\n(Sequence)")]
+        StopT[("Action: STOP_MOTORS")] --> TiltRoot
+        TiltL[("Action: HEAD_TILT_LEFT")] --> TiltRoot
+        WaitT[("Action: WAIT_0.5s")] --> TiltRoot
+        TiltR[("Action: HEAD_TILT_RIGHT")] --> TiltRoot
+        SoundT[("Action: PLAY_HMM_SOUND")] --> TiltRoot
+
+        %% STRETCH (Boredom)
+        StretchRoot[("STRETCH_AND_YAWN\n(Sequence)")]
+        HeadUp[("Action: HEAD_MAX_UP")] --> StretchRoot
+        HeadDown[("Action: HEAD_MAX_DOWN")] --> StretchRoot
+        Shake[("Action: SHAKE_BODY")] --> StretchRoot
+        Yawn[("Action: PLAY_YAWN_SOUND")] --> StretchRoot
+
+        %% LOOK AROUND (Passive)
+        LookRoot[("LOOK_AROUND\n(Sequence)")]
+        PanRand[("Action: HEAD_PAN_RANDOM")] --> LookRoot
+        Blink[("Action: BLINK_EYES")] --> LookRoot
+    end
+```
