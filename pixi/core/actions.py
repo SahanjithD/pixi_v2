@@ -244,11 +244,11 @@ def attach_stub_handlers(state_manager: Any = None) -> None:
             if gesture:
                 info += f" [Gesture: {gesture}]"
             
-            energy_debug = ""
+            state_debug = ""
             if state_manager:
-                energy_debug = f" [Energy: {state_manager.get_state().get('energy', 0.0):.2f}]"
+                state_debug = f" [State: {state_manager.get_state()}]"
 
-            print(f"[Hardware] Executing: {action_name.value}{info}{energy_debug}") # TODO: Remove after debug
+            print(f"[Hardware] Executing: {action_name.value}{info}{state_debug}\n") # TODO: Remove after debug
         return _handler
 
     for descriptor in ACTION_REGISTRY.all():

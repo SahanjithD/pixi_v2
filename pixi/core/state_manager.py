@@ -32,7 +32,7 @@ class InternalState:
     recognized_person: Optional[str] = None
     last_action: Optional[ActionName] = None
     attention_hunger: float = 0.35  # 0.0 (Satisfied) - 1.0 (Starving for love)
-    excitement: float = 0.45
+    excitement: float = 0.2
     caution: float = 0.3
 
 
@@ -222,7 +222,7 @@ class StateManager:
         self._state.excitement = self._clamp(self._state.excitement)
         self._state.caution = self._clamp(self._state.caution)
 
-        if action not in {ActionName.IGNORE, ActionName.BACK_AWAY_SCARED, ActionName.AVOID_OBSTACLE, ActionName.GO_TO_SLEEP}:
+        if action not in {ActionName.IGNORE, ActionName.BACK_AWAY_SCARED, ActionName.AVOID_OBSTACLE, ActionName.GO_TO_SLEEP, ActionName.STRETCH, ActionName.LOOK_AROUND}:
             self.register_interaction(self._state.recognized_person)
 
     def get_state(self) -> dict:

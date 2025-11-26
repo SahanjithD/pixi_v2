@@ -164,7 +164,7 @@ class LocalBrain:
         # Logic: I am STARVING for attention. Normal 'Follow' is not enough.
         # This overrides 'Follow' when hunger is extreme.
         if face_data and current_state['attention_hunger'] > 0.85:
-            scores[ActionName.COME_CLOSER] = current_state['attention_hunger'] * 2.5
+            scores[ActionName.COME_CLOSER] = current_state['attention_hunger'] * 3.0
         else:
             scores[ActionName.COME_CLOSER] = 0.0
 
